@@ -588,7 +588,7 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
   </p>
   <div class="links">
     <a href="https://www.linkedin.com/in/wyattscheberies" target="_blank">Linkedin</a>
-    <a href="/cdn-cgi/l/email-protection#d8afa1b9acacf6abbbb0bdbabdaab1bdab98bfb5b9b1b4f6bbb7b5">Email</a>
+    <a href="/cdn-cgi/l/email-protection#43343a2237376d30202b262126312a263003242e222a2f6d202c2e">Email</a>
   </div>
 </header>
 
@@ -679,11 +679,14 @@ function renderMarquee() {
   const track = document.createElement('div');
   track.className = 'c-marquee-track';
   const imgs = [...PHOTOS, ...PHOTOS, ...PHOTOS]; // triple for loop room
+  const imgEls = [];
   imgs.forEach((src, i) => {
     const img = document.createElement('img');
-    img.src = src; img.className = 'photo'; img.loading = 'lazy'; img.alt = '';
+    // eager-load so widths are known up front (lazy was causing unitWidth to be measured too early)
+    img.src = src; img.className = 'photo'; img.loading = 'eager'; img.decoding = 'async'; img.alt = '';
     img.dataset.origIdx = i % PHOTOS.length;
     track.appendChild(img);
+    imgEls.push(img);
   });
   wrap.appendChild(track);
   host.appendChild(wrap);
@@ -706,10 +709,29 @@ function renderMarquee() {
 
   const measure = () => {
     unitWidth = track.scrollWidth / 3;
-    // start x at 0 within the middle cycle — track is offset by -unitWidth
-    // so we see the middle copy centered around screen.
+    // if x somehow drifted outside the valid range (e.g. before images loaded,
+    // x was tracking against a stale small unitWidth), clamp back in.
+    x = wrapXWithWidth(x, unitWidth);
+    applyTransform();
   };
+
+  // helper that doesn't rely on module-scope unitWidth (used inside measure)
+  const wrapXWithWidth = (v, uw) => {
+    if (uw <= 0) return v;
+    v = v % uw;
+    if (v > 0) v -= uw;
+    return v;
+  };
+
+  // Measure once now, then again as each image loads (images change scrollWidth),
+  // and once more after everything settles. unitWidth being wrong = loop resets early.
   requestAnimationFrame(() => { measure(); });
+  imgEls.forEach(img => {
+    if (img.complete && img.naturalWidth > 0) return;
+    img.addEventListener('load', measure, { once: true });
+    img.addEventListener('error', measure, { once: true });
+  });
+  window.addEventListener('load', measure);
   window.addEventListener('resize', measure);
 
   const wrapX = (v) => {
