@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Wyatt Scheberies</title>
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="favicon.png">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="apple-touch-icon" href="images/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
@@ -47,9 +47,11 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
     overflow-x: hidden;
     transition: background .5s var(--ease), color .5s var(--ease);
     min-height: 100vh;
+    min-height: 100svh;
     display: flex;
     flex-direction: column;
     position: relative;
+    -webkit-tap-highlight-color: transparent;
   }
   /* Subtle atmosphere — keeps flat black from feeling dead */
   body::before {
@@ -100,7 +102,7 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
   .rule { display: none; }
   .bio {
     margin: 20px auto 0;
-    max-width: 440px;
+    max-width: 500px;
     font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 16px;
     font-weight: 400;
@@ -165,6 +167,8 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
     position: relative;
     padding: 140px 0;
     margin: -140px 0;
+    /* Let vertical page scroll pass through; only horizontal swipe triggers drag */
+    touch-action: pan-y;
   }
   .c-marquee::before, .c-marquee::after {
     content: '';
@@ -191,11 +195,15 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
     transform-origin: center center;
     position: relative;
   }
-  .c-marquee .photo:hover {
-    transform: scale(1.35);
-    filter: saturate(1.2) brightness(1.05);
-    box-shadow: 0 40px 80px rgba(0,0,0,.6);
-    z-index: 10;
+  /* Hover scale only on devices with a real pointer (desktop) —
+     prevents sticky-hover snap on touch */
+  @media (hover: hover) {
+    .c-marquee .photo:hover {
+      transform: scale(1.35);
+      filter: saturate(1.2) brightness(1.05);
+      box-shadow: 0 40px 80px rgba(0,0,0,.6);
+      z-index: 10;
+    }
   }
   .c-marquee[data-dim="true"] .photo:not(.focused) {
     opacity: .25;
@@ -289,13 +297,24 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
   }
   .lightbox .lb-close {
     position: absolute;
-    top: 24px; right: 28px;
+    top: 12px; right: 12px;
     color: rgba(255,255,255,.7);
+    background: none;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    display: grid;
+    place-items: center;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    font-size: 16px;
+    line-height: 1;
     cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: color .2s var(--ease), border-color .2s var(--ease);
+  }
+  .lightbox .lb-close:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,.5);
   }
   .lightbox .lb-arrow {
     position: absolute;
@@ -628,6 +647,30 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
     header.top { padding: 56px 6vw 20px; }
     .c-ribbon { grid-template-columns: 1fr; }
     .c-cover .photo { width: 55vw; height: 72vw; }
+
+    /* Marquee: shrink photos so multiple fit on a phone viewport,
+       and drop the giant hover-scale padding since touch has no hover. */
+    .c-marquee {
+      padding: 30px 0;
+      margin: -30px 0;
+    }
+    .c-marquee::before, .c-marquee::after {
+      top: 30px; bottom: 30px;
+    }
+    .c-marquee .photo {
+      height: clamp(180px, 34vh, 240px);
+    }
+    .c-marquee-track {
+      gap: 14px;
+    }
+    .carousel-host {
+      min-height: 40vh;
+      padding: 0 0 4vh;
+    }
+    /* Lightbox arrows: 44pt min touch target, closer to edges */
+    .lightbox .lb-prev { left: 8px; }
+    .lightbox .lb-next { right: 8px; }
+    .lightbox .lb-arrow { width: 44px; height: 44px; font-size: 20px; }
   }
 </style>
 </head>
@@ -641,7 +684,7 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
   <div class="links">
     <a href="https://www.linkedin.com/in/wyattscheberies" target="_blank">Linkedin</a>
     <span class="sep">|</span>
-    <a href="/cdn-cgi/l/email-protection#5d2a243c29291d2e3e35383f382f34382e733e3230">Email</a>
+    <a href="/cdn-cgi/l/email-protection#f98e80988d8db98a9a919c9b9c8b909c8ad79a9694">Email</a>
   </div>
   <div class="rule"></div>
 </header>
@@ -652,7 +695,7 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
   <button class="lb-arrow lb-prev" id="lb-prev" aria-label="Previous">‹</button>
   <img id="lb-img" alt="">
   <button class="lb-arrow lb-next" id="lb-next" aria-label="Next">›</button>
-  <div class="lb-close">Close · Esc</div>
+  <button class="lb-close" id="lb-close" aria-label="Close">✕</button>
   <div class="lb-idx" id="lb-idx"></div>
 </div>
 
@@ -660,13 +703,13 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
 <div class="egg" id="egg">
   <div class="egg-bagel">🥯</div>
   <h2>The Bagel <em>Leaderboard</em></h2>
-  <p>A strictly unofficial, biased ranking of bagels.</p>
+  <p>A strictly unofficial, frequently biased ranking of bagels consumed in the field.</p>
   <div class="egg-list">
     <div class="rank">01</div><div class="name">Ess-A-Bagel · NYC</div><div class="score">9.9</div>
     <div class="rank">02</div><div class="name">Tompkins Square (original) · NYC</div><div class="score">9.6</div>
-    <div class="rank">03</div><div class="name">Tahoe Bagel Company · Renoooo </div><div class="score">9.3</div>
-    <div class="rank">04</div><div class="name">Latte Da · Sentimental </div><div class="score">9.0*</div>
-    <div class="rank">05</div><div class="name">Bageletto (Very solid SF, but so expensive)</div><div class="score">2.1</div>
+    <div class="rank">03</div><div class="name">Tahoe Bagel Company · Renoooo</div><div class="score">9.3</div>
+    <div class="rank">04</div><div class="name">Latte Da · Sentimental</div><div class="score">9.0*</div>
+    <div class="rank">05</div><div class="name">Bageletto · Very solid SF, but so expensive</div><div class="score">2.1</div>
   </div>
   <button class="egg-close" id="egg-close">Close (or press Esc)</button>
 </div>
@@ -974,8 +1017,9 @@ function lbStep(d) {
   lbIdx.textContent = `${String(lbCurrent+1).padStart(2,'0')} / ${String(PHOTOS.length).padStart(2,'0')}`;
 }
 lightbox.addEventListener('click', (e) => {
-  if (e.target === lightbox || e.target.classList.contains('lb-close')) closeLightbox();
+  if (e.target === lightbox) closeLightbox();
 });
+document.getElementById('lb-close').addEventListener('click', (e) => { e.stopPropagation(); closeLightbox(); });
 document.getElementById('lb-prev').addEventListener('click', (e) => { e.stopPropagation(); lbStep(-1); });
 document.getElementById('lb-next').addEventListener('click', (e) => { e.stopPropagation(); lbStep(1); });
 lbImg.addEventListener('click', (e) => { e.stopPropagation(); lbStep(1); });
