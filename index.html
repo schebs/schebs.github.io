@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Wyatt Scheberies</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
@@ -12,7 +14,7 @@
 const TWEAKS = /*EDITMODE-BEGIN*/{
   "carousel": "marquee",
   "palette": "forest",
-  "bagelCursor": true
+  "bagelCursor": false
 }/*EDITMODE-END*/;
 </script>
 
@@ -60,24 +62,58 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
     z-index: 2;
   }
   h1.name {
-    font-family: 'Fraunces', serif;
-    font-weight: 300;
-    font-size: clamp(40px, 7vw, 92px);
-    line-height: 0.95;
-    letter-spacing: -0.035em;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: clamp(32px, 5vw, 64px);
+    line-height: 1;
+    letter-spacing: -0.02em;
     margin: 0;
   }
-  h1.name .dot { color: var(--accent); }
-  .bio {
-    margin: 22px auto 0;
-    max-width: 560px;
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(17px, 1.4vw, 21px);
-    line-height: 1.45;
-    color: var(--fg);
-    opacity: .78;
+  h1.name .dot {
+    color: var(--accent);
+    margin-left: 2px;
+    display: inline-block;
+    transform: translateY(-2px);
   }
-  .bio em { font-style: italic; color: var(--accent); opacity: 1; }
+  /* Link separator */
+  .links .sep {
+    color: var(--accent);
+    opacity: .7;
+    align-self: center;
+  }
+  /* Hairline rule below header */
+  .rule {
+    margin: 36px auto 0;
+    width: min(560px, 70vw);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1px;
+    position: relative;
+  }
+  .rule::before, .rule::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, color-mix(in oklab, var(--accent) 35%, transparent), transparent);
+  }
+  .rule span {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin: 0 14px;
+    opacity: .8;
+  }
+  .bio {
+    margin: 20px auto 0;
+    max-width: 560px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--fg);
+    opacity: .72;
+  }
   .links {
     margin-top: 26px;
     display: flex; justify-content: center; gap: 28px;
@@ -256,6 +292,33 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
     font-size: 11px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
+    cursor: pointer;
+  }
+  .lightbox .lb-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: 1px solid rgba(255,255,255,.25);
+    color: rgba(255,255,255,.75);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    font-size: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    display: grid; place-items: center;
+    backdrop-filter: blur(6px);
+    transition: opacity .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease), transform .2s var(--ease);
+    z-index: 5;
+    line-height: 1;
+    padding: 0 0 3px;
+  }
+  .lightbox .lb-prev { left: 24px; }
+  .lightbox .lb-next { right: 24px; }
+  .lightbox .lb-arrow:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,.6);
+    transform: translateY(-50%) scale(1.05);
   }
   .lightbox .lb-idx {
     position: absolute;
@@ -451,19 +514,6 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
     to { transform: translateY(0); }
   }
 
-  /* ================ FOOTER ================ */
-  footer.bot {
-    padding: 20px 6vw 30px;
-    display: flex; justify-content: space-between; align-items: center;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  footer.bot .dot-accent { color: var(--accent); }
-  footer.bot .hint-text { opacity: .35; font-style: italic; font-family: 'Instrument Serif', serif; text-transform: none; letter-spacing: 0; font-size: 12px; }
-
   /* ================ TWEAKS ================ */
   .tweaks {
     position: fixed;
@@ -581,30 +631,27 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
 <body>
 
 <header class="top">
-  <h1 class="name">Wyatt Scheberies<span class="dot">.</span></h1>
+  <h1 class="name">Wyatt Scheberies</h1>
   <p class="bio">
-    Competitive bagel enjoyer. Frequent overthinker. Enjoys learning new things,
-    <em>tinkering with old things</em>, and spending time outside.
+    AI &amp; research analyst at RBF Capital. Building, learning, and token maxxing. Occasionally outside.
   </p>
   <div class="links">
     <a href="https://www.linkedin.com/in/wyattscheberies" target="_blank">Linkedin</a>
-    <a href="/cdn-cgi/l/email-protection#f08789918484b083939895929582999583de939f9d">Email</a>
+    <span class="sep">·</span>
+    <a href="mailto:wyatt@scheberies.com">Email</a>
   </div>
+  <div class="rule"><span></span></div>
 </header>
 
 <section class="carousel-host" id="carouselHost"><!-- populated --></section>
 
 <div class="lightbox" id="lightbox">
-  <div class="lb-close">Close · Esc</div>
+  <button class="lb-arrow lb-prev" id="lb-prev" aria-label="Previous">‹</button>
   <img id="lb-img" alt="">
+  <button class="lb-arrow lb-next" id="lb-next" aria-label="Next">›</button>
+  <div class="lb-close">Close · Esc</div>
   <div class="lb-idx" id="lb-idx"></div>
 </div>
-
-<footer class="bot">
-  <span>© Wyatt Scheberies</span>
-  <span class="hint-text">… try clicking a photo 3 times, or typing b-a-g-e-l</span>
-  <span><span class="dot-accent">★</span> made with care</span>
-</footer>
 
 <!-- Easter egg -->
 <div class="egg" id="egg">
@@ -647,7 +694,7 @@ const TWEAKS = /*EDITMODE-BEGIN*/{
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const STATE = {
   carousel: localStorage.getItem('ws_car') || TWEAKS.carousel,
   palette: localStorage.getItem('ws_pal') || TWEAKS.palette,
@@ -925,8 +972,10 @@ function lbStep(d) {
 }
 lightbox.addEventListener('click', (e) => {
   if (e.target === lightbox || e.target.classList.contains('lb-close')) closeLightbox();
-  else if (e.target === lbImg) lbStep(1);
 });
+document.getElementById('lb-prev').addEventListener('click', (e) => { e.stopPropagation(); lbStep(-1); });
+document.getElementById('lb-next').addEventListener('click', (e) => { e.stopPropagation(); lbStep(1); });
+lbImg.addEventListener('click', (e) => { e.stopPropagation(); lbStep(1); });
 document.addEventListener('keydown', (e) => {
   if (!lightbox.classList.contains('on')) return;
   if (e.key === 'ArrowRight') lbStep(1);
